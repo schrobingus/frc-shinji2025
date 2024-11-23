@@ -1,45 +1,54 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.*;
-import frc.robot.SwerveModule;
+import java.io.File;
+import java.util.function.DoubleSupplier;
 
-public class SwerveSubsystem {
-    private final SwerveModule moduleFL;
-    private final SwerveModule moduleFR;
-    private final SwerveModule moduleBL;
-    private final SwerveModule moduleBR;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import swervelib.parser.SwerveParser;
+import swervelib.SwerveDrive;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+
+public class SwerveSubsystem extends SubsystemBase {
+    public final SwerveDrive swerveDrive;
+
+    double maximumSpeed = Units.feetToMeters(4.5);
+    File swerveJsonDirectory = new File(
+        Filesystem.getDeployDirectory(), "swerve");
+    
     public SwerveSubsystem() {
-        moduleFL = new SwerveModule(
-            FL_DRMO,
-            FL_DRMO_REVERSED,
-            FL_TRMO,
-            FL_TRMO_REVERSED,
-            FL_TREN
-        );
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+        // SwerveDriveTelemetry.verbosity = TelemetryVerbosity.NONE;
 
-        moduleFR = new SwerveModule(
-            FR_DRMO,
-            FR_DRMO_REVERSED,
-            FR_TRMO,
-            FR_TRMO_REVERSED,
-            FR_TREN
-        );
+        try {
+            swerveDrive = new SwerveParser(swerveJsonDirectory)
+                .createSwerveDrive(maximumSpeed);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        moduleBL = new SwerveModule(
-            BL_DRMO,
-            BL_DRMO_REVERSED,
-            BL_TRMO,
-            BL_TRMO_REVERSED,
-            BL_TREN
-        );
-        
-        moduleBR = new SwerveModule(
-            BR_DRMO,
-            BR_DRMO_REVERSED,
-            BR_TRMO,
-            BR_TRMO_REVERSED,
-            BR_TREN
-        );
+    // TODO: implement translative drive
+
+    public Command driveCommand(
+        DoubleSupplier translationX, 
+        DoubleSupplier translationY,
+        DoubleSupplier angularRotationX
+    ) {
+        return run(() -> {
+            swerveDrive.drive(
+                new Translation2d(
+                    translationX.getAsDouble() * swerveDrive.getMaximumVelocity(),
+                    translationY.getAsDouble() * swerveDrive.getMaximumVelocity()
+                ),
+                angularRotationX.getAsDouble() * swerveDrive.getMaximumAngularVelocity(),
+                true, false
+            );
+        });
     }
 }
