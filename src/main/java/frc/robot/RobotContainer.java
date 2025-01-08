@@ -12,8 +12,8 @@ import frc.robot.subsystems.SwerveSubsystem;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private final int translationAxis = XboxController.Axis.kLeftY.value;
-  private final int strafeAxis = XboxController.Axis.kLeftX.value;
+  private final int translationAxis = XboxController.Axis.kLeftX.value;
+  private final int strafeAxis = XboxController.Axis.kLeftY.value;
   private final int rotationAxis = XboxController.Axis.kRightX.value;
 
   private final CommandXboxController pilot = new CommandXboxController(0);
